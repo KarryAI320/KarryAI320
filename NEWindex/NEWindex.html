@@ -1,0 +1,1487 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>香云纱答题网站</title>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{
+      width:100%;min-height:100%;overflow-x:hidden;cursor:none;
+      font-family:"PingFang SC","Microsoft YaHei","Noto Serif SC",serif;
+      color:#f8f0e4;
+      /* 核心修改：替换成你的背景图，保留原有渐变叠加效果 */
+      background:
+        url("bg.jpg.jpg") center / cover no-repeat fixed,
+        radial-gradient(circle at 18% 16%,rgba(201,154,92,.12),transparent 24%),
+        radial-gradient(circle at 82% 26%,rgba(126,75,45,.16),transparent 22%),
+        radial-gradient(circle at 42% 78%,rgba(92,52,29,.12),transparent 26%),
+        linear-gradient(135deg,#140d09 0%,#2a1a12 42%,#100a07 100%);
+    }
+    body:before{
+      content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.28;
+      background:
+        repeating-linear-gradient(90deg,rgba(255,255,255,.018) 0,rgba(255,255,255,.018) 1px,transparent 1px,transparent 46px),
+        repeating-linear-gradient(0deg,rgba(255,255,255,.012) 0,rgba(255,255,255,.012) 1px,transparent 1px,transparent 46px);
+    }
+    #particles-js,.ink-bg,.page-transition{position:fixed;inset:0}
+    #particles-js{z-index:0;pointer-events:none}
+    .ink-bg{
+      z-index:0;pointer-events:none;filter:blur(10px);
+      background:
+        radial-gradient(circle at 12% 14%,rgba(255,224,178,.06),transparent 18%),
+        radial-gradient(circle at 86% 20%,rgba(255,239,210,.04),transparent 16%),
+        radial-gradient(circle at 32% 76%,rgba(255,225,186,.05),transparent 20%);
+    }
+    .page-transition{
+      z-index:9998;pointer-events:none;opacity:0;transform:scale(1.04);
+      background:
+        radial-gradient(circle at center,rgba(219,171,110,.18),transparent 42%),
+        linear-gradient(135deg,#120b08,#2a1a12,#120b08);
+    }
+    .cursor-dot,.cursor-ring{
+      position:fixed;left:0;top:0;transform:translate(-50%,-50%);
+      pointer-events:none;z-index:99999;border-radius:50%;
+      /* 取消过渡，让跟随更利落 */
+      transition:width .1s,height .1s,border-color .1s,background .1s;
+    }
+    .cursor-dot{
+      width:8px;height:8px;background:#f6d7a4;box-shadow:0 0 14px rgba(246,215,164,.9);
+      /* 小点无延迟跟随 */
+      transition: none;
+    }
+    .cursor-ring{
+      width:34px;height:34px;border:1px solid rgba(246,215,164,.68);
+      background:rgba(255,240,220,.04);backdrop-filter:blur(6px);
+    }
+    .page{position:relative;z-index:2;width:min(1320px,calc(100% - 28px));margin:18px auto 40px}
+    .glass{
+      background:rgba(45,28,18,.30);
+      border:1px solid rgba(255,228,190,.12);
+      backdrop-filter:blur(18px);
+      box-shadow:0 18px 55px rgba(0,0,0,.28);
+      border-radius:28px;
+    }
+    .topbar{
+      display:flex;align-items:center;justify-content:space-between;gap:18px;
+      padding:20px 24px;margin-bottom:18px
+    }
+    .brand{display:flex;align-items:center;gap:16px}
+    .seal{
+      width:58px;height:58px;border-radius:18px;display:grid;place-items:center;
+      font-size:24px;font-weight:800;color:#fff3da;
+      background:linear-gradient(135deg,#8f321f,#be7641);
+      box-shadow:0 12px 30px rgba(190,118,65,.34);
+      transform-style:preserve-3d;
+    }
+    .brand h1{font-size:28px;font-weight:800;letter-spacing:1px;color:#faecd5}
+    .brand p{margin-top:6px;font-size:13px;color:#d8b487}
+    .top-actions{display:flex;gap:10px;flex-wrap:wrap}
+    .btn{
+      border:none;outline:none;cursor:none;padding:13px 20px;border-radius:16px;
+      color:#fff7ec;font-size:14px;font-weight:700;user-select:none;
+      transition:transform .16s ease,box-shadow .2s ease,opacity .2s ease,filter .2s ease
+    }
+    .btn:hover{transform:translateY(-2px) scale(1.02)}
+    .btn:active{transform:scale(.985)}
+    .btn-primary{
+      background:linear-gradient(135deg,#8e3d23,#c88a4f);
+      box-shadow:0 12px 30px rgba(186,126,69,.26)
+    }
+    .btn-secondary{
+      background:rgba(255,244,226,.08);
+      border:1px solid rgba(255,226,190,.14)
+    }
+    .layout{display:grid;grid-template-columns:1.18fr .52fr;gap:18px}
+    .hero{padding:34px 28px;min-height:220px;overflow:hidden;position:relative}
+    .hero:before{
+      content:"";position:absolute;inset:0;pointer-events:none;
+      background:
+        linear-gradient(135deg,rgba(255,226,188,.05),transparent 40%),
+        radial-gradient(circle at 90% 15%,rgba(255,239,214,.08),transparent 18%)
+    }
+    .hero h2{font-size:42px;line-height:1.2;margin-bottom:14px;color:#f9ebd1}
+    .hero p{font-size:15px;line-height:1.95;color:#dcbf98;max-width:860px}
+    .hero-buttons{display:flex;gap:12px;margin-top:24px;flex-wrap:wrap}
+    .progress-card{padding:18px 22px;margin:16px 0}
+    .progress-head{
+      display:flex;justify-content:space-between;align-items:center;
+      margin-bottom:12px;color:#efdcb9;font-size:14px
+    }
+    .progress-track{
+      height:12px;border-radius:999px;background:rgba(255,240,220,.08);
+      overflow:hidden;border:1px solid rgba(255,240,220,.08)
+    }
+    .progress-fill{
+      width:0;height:100%;border-radius:999px;
+      background:linear-gradient(90deg,#9f4a27,#d39a5c,#f4dbab);
+      transition:width .45s cubic-bezier(.2,.8,.2,1)
+    }
+    .quiz-card{
+      padding:26px;transform-style:preserve-3d;transition:transform .25s ease,box-shadow .25s ease;
+      min-height:560px
+    }
+    .quiz-card.expand{animation:springPop .7s cubic-bezier(.175,.885,.32,1.32)}
+    @keyframes springPop{
+      0%{transform:scale(.94) translateY(16px);opacity:.45}
+      55%{transform:scale(1.025) translateY(-5px);opacity:1}
+      78%{transform:scale(.992) translateY(2px)}
+      100%{transform:scale(1) translateY(0)}
+    }
+    .question-meta{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}
+    .question-no{font-size:14px;color:#d4b289}
+    .type-badge{
+      padding:8px 14px;border-radius:999px;font-size:13px;font-weight:800;
+      border:1px solid rgba(255,240,220,.12);background:rgba(255,240,220,.06);color:#f7e2bb
+    }
+    .type-badge.multi{color:#ffd8a0;border-color:rgba(255,190,95,.28);background:rgba(255,190,95,.11)}
+    .type-badge.single{color:#f4e8cd;border-color:rgba(255,224,188,.18);background:rgba(255,244,225,.06)}
+    .type-badge.judge{color:#f0d5b6;border-color:rgba(212,154,91,.22);background:rgba(212,154,91,.10)}
+    .question-title{font-size:28px;line-height:1.7;margin-bottom:24px;color:#fff2dc;font-weight:800}
+    .options{display:grid;gap:14px}
+    .option{
+      position:relative;display:flex;align-items:center;gap:14px;padding:18px;border-radius:20px;
+      background:rgba(255,245,228,.05);border:1px solid rgba(255,232,199,.1);cursor:none;
+      transition:transform .22s cubic-bezier(.2,.8,.2,1),border-color .2s ease,background .2s ease;
+      overflow:hidden;transform-style:preserve-3d
+    }
+    .option:before{
+      content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,245,228,.09),transparent 60%);
+      opacity:0;transition:opacity .2s ease
+    }
+    .option:hover:before{opacity:1}
+    .option:hover{transform:translateY(-2px) scale(1.008);border-color:rgba(255,232,199,.22)}
+    .option.selected{
+  background:rgba(255, 215, 140, .28);
+  border-color:rgba(255, 215, 140, .8);
+  box-shadow: 0 0 18px rgba(255, 215, 140, .35);
+  transform: translateY(-2px) scale(1.01);
+}
+    .option.correct{background:rgba(83,160,112,.18);border-color:rgba(95,194,131,.42)}
+    .option.wrong{background:rgba(190,70,60,.18);border-color:rgba(222,102,90,.42)}
+    .option-key{
+      width:38px;height:38px;border-radius:50%;display:grid;place-items:center;
+      background:rgba(255,245,228,.08);border:1px solid rgba(255,245,228,.12);
+      font-weight:800;color:#fff2da;flex-shrink:0
+    }
+    .option-text{font-size:16px;line-height:1.75;color:#f4e5cd}
+    .action-bar{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}
+    .analysis-panel{
+      display:none;margin-top:22px;padding:20px;border-radius:22px;
+      background:rgba(255,245,228,.05);border:1px solid rgba(255,232,199,.10)
+    }
+    .analysis-panel.show{display:block;animation:springPop .45s cubic-bezier(.175,.885,.32,1.18)}
+    .analysis-title{font-size:19px;font-weight:800;color:#fff1d7;margin-bottom:12px}
+    .status-pill{
+      display:inline-block;margin-bottom:12px;padding:8px 12px;border-radius:999px;font-size:13px;font-weight:800
+    }
+    .status-pill.ok{background:rgba(86,180,120,.18);border:1px solid rgba(110,220,152,.35);color:#bff3cf}
+    .status-pill.bad{background:rgba(200,80,70,.16);border:1px solid rgba(224,112,100,.35);color:#ffc7c2}
+    .analysis-body p{font-size:15px;line-height:1.9;color:#ecd9bc;margin:8px 0}
+    .option-explain{
+      margin-top:12px;padding:14px;border-radius:16px;
+      background:rgba(255,245,228,.035);border:1px solid rgba(255,232,199,.08)
+    }
+    .option-explain strong{color:#fff0d2}
+    .result-card{display:none;margin-top:18px;padding:26px}
+    .result-card.show{display:block;animation:pageIn .55s ease}
+    .result-top{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap}
+    .result-top h2{font-size:60px;color:#fff1d7}
+    .result-top p{color:#d9b98e;margin-top:8px}
+    .result-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px}
+    .result-item{
+      padding:18px;border-radius:20px;background:rgba(255,245,228,.045);
+      border:1px solid rgba(255,232,199,.09)
+    }
+    .result-item span{display:block;color:#d4b289;margin-bottom:10px}
+    .result-item strong{font-size:30px;color:#fff0d2}
+    .side{display:flex;flex-direction:column;gap:18px}
+    .side-card{padding:22px;min-height:160px}
+    .side-card h3{font-size:20px;margin-bottom:14px;color:#fff0d5}
+    .side-card ul{padding-left:20px;color:#e6ceb0;line-height:1.95}
+    .wrong-panel{display:none}
+    .wrong-panel.show{display:block;animation:pageIn .45s ease}
+    .wrong-item{
+      padding:14px;border-radius:16px;background:rgba(255,245,228,.04);
+      border:1px solid rgba(255,232,199,.08);margin-bottom:12px
+    }
+    .wrong-item h4{font-size:15px;color:#fff0d2;margin-bottom:8px;line-height:1.7}
+    .wrong-item p{font-size:14px;color:#e0c6a1;line-height:1.8;margin:4px 0}
+    @keyframes pageIn{from{opacity:0;transform:translateY(16px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+    @media (max-width:1050px){
+      .layout{grid-template-columns:1fr}
+      .result-grid{grid-template-columns:1fr}
+      .hero h2{font-size:32px}
+      .question-title{font-size:23px}
+      .result-top h2{font-size:44px}
+      .topbar{flex-direction:column;align-items:flex-start}
+    }
+  </style>
+</head>
+<body>
+  <div id="particles-js"></div>
+  <div class="ink-bg"></div>
+  <div class="page-transition" id="pageTransition"></div>
+  <div class="cursor-dot" id="cursorDot"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <div class="page">
+    <header class="topbar glass">
+      <div class="brand">
+        <div class="seal" id="seal3d">纱</div>
+        <div>
+          <h1>香云纱答题网站</h1>
+          <p>古风沉浸式答题体验</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button class="btn btn-secondary" id="soundBtn">音效：开</button>
+        <button class="btn btn-secondary" id="wrongBtn">错题回顾</button>
+      </div>
+    </header>
+
+    <div class="layout">
+      <section>
+        <div class="glass hero">
+          <h2>香云纱知识问答</h2>
+          <p>每次随机抽取十道题，提交后显示答案与选项解析，手动点击下一题继续。多选题会明确标注，多选未选满也会先显示解析，不会自动跳转。</p>
+          <div class="hero-buttons">
+            <button class="btn btn-primary" id="startBtn">开始答题</button>
+            <button class="btn btn-secondary" id="restartBtn">重新抽题</button>
+          </div>
+        </div>
+
+        <div class="glass progress-card">
+          <div class="progress-head">
+            <span id="progressText">尚未开始</span>
+            <span id="scoreText">得分：0</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+        </div>
+
+        <div class="glass quiz-card" id="quizCard">
+          <div class="question-meta">
+            <div class="question-no" id="questionNo">点击开始答题</div>
+            <div class="type-badge single" id="questionType">题型</div>
+          </div>
+          <div class="question-title" id="questionTitle">准备进入本轮随机题目</div>
+          <div class="options" id="options"></div>
+          <div class="action-bar">
+            <button class="btn btn-primary" id="submitBtn">提交答案</button>
+            <button class="btn btn-secondary" id="nextBtn" disabled>下一题</button>
+          </div>
+          <div class="analysis-panel" id="analysisPanel">
+            <div class="analysis-title">答案解析</div>
+            <div class="analysis-body" id="analysisBody"></div>
+          </div>
+        </div>
+
+        <div class="glass result-card" id="resultCard">
+          <div class="result-top">
+            <div>
+              <h2 id="finalScore">0 / 10</h2>
+              <p>本轮答题完成</p>
+            </div>
+            <button class="btn btn-primary" id="retryBtn">再来一轮</button>
+          </div>
+          <div class="result-grid">
+            <div class="result-item"><span>答对</span><strong id="correctCount">0</strong></div>
+            <div class="result-item"><span>答错</span><strong id="wrongCount">0</strong></div>
+            <div class="result-item"><span>正确率</span><strong id="accuracyText">0%</strong></div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="side">
+        <div class="glass side-card">
+          <h3>答题规则</h3>
+          <ul>
+            <li>每轮随机 10 题</li>
+            <li>提交后先看解析</li>
+            <li>点击“下一题”才跳题</li>
+            <li>多选题有明确标识</li>
+            <li>多选未选满也进入解析</li>
+          </ul>
+        </div>
+        <div class="glass side-card wrong-panel" id="wrongPanel">
+          <h3>错题回顾</h3>
+          <div id="wrongList"></div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    const questionBank = [
+      {
+        type:"single",
+        question:"香云纱的本名、官方正统叫法是（ ）",
+        options:{A:"响云纱",B:"莨纱绸",C:"云纱",D:"花纱"},
+        answer:["B"],
+        explainMap:{
+          A:"“响云纱”是常见别称，但不是本题要求的官方正统本名。",
+          B:"正确。题库参考答案对应“莨纱绸”，这是香云纱的本名、官方正统叫法。",
+          C:"“云纱”属于相关称呼，不是本题要找的官方正统名称。",
+          D:"“花纱”不是题库中对应的标准名称。"
+        }
+      },
+      {
+        type:"single",
+        question:"香云纱是我国哪个省份的特色非遗丝绸面料（ ）",
+        options:{A:"浙江省",B:"广东省",C:"江苏省",D:"四川省"},
+        answer:["B"],
+        explainMap:{
+          A:"浙江丝绸知名，但本题对应省份不是浙江。",
+          B:"正确。题库答案显示香云纱是广东省的特色非遗丝绸面料。",
+          C:"江苏有丝绸产业，但不是本题答案。",
+          D:"四川也有丝绸文化，但香云纱对应的是广东。"
+        }
+      },
+      {
+        type:"single",
+        question:"香云纱传统染整技艺，属于哪一级非物质文化遗产（ ）",
+        options:{A:"区级",B:"市级",C:"国家级",D:"世界级"},
+        answer:["C"],
+        explainMap:{
+          A:"级别不对。",
+          B:"不是题库对应答案。",
+          C:"正确。题库参考答案对应“国家级”。",
+          D:"题库并未标注为世界级。"
+        }
+      },
+      {
+        type:"single",
+        question:"香云纱核心发源地、主要产区是广东哪里（ ）",
+        options:{A:"佛山顺德",B:"广州天河",C:"深圳南山",D:"东莞"},
+        answer:["A"],
+        explainMap:{
+          A:"正确。题库中核心发源地、主要产区对应佛山顺德。",
+          B:"不是题库答案。",
+          C:"不是题库答案。",
+          D:"不是题库答案。"
+        }
+      },
+      {
+        type:"single",
+        question:"香云纱最初被叫做“响云纱”，原因是（ ）",
+        options:{A:"自带香味",B:"走动摩擦发出沙沙声响",C:"产地得名",D:"工艺得名"},
+        answer:["B"],
+        explainMap:{
+          A:"并不是因为自带香味。",
+          B:"正确。题库给出的原因是走动摩擦时会发出沙沙声响。",
+          C:"不是因产地得名。",
+          D:"也不是因工艺直接得名。"
+        }
+      },
+      {
+        type:"single",
+        question:"制作香云纱的核心天然植物染料是（ ）",
+        options:{A:"艾草",B:"薯莨",C:"茶叶",D:"花朵"},
+        answer:["B"],
+        explainMap:{
+          A:"艾草不是香云纱核心植物染料。",
+          B:"正确。题库明确指出核心天然植物染料是薯莨。",
+          C:"茶叶不是本题答案。",
+          D:"花朵并非传统核心染料。"
+        }
+      },
+      {
+        type:"single",
+        question:"香云纱染整用到的特殊天然辅料是（ ）",
+        options:{A:"泥土",B:"河道淤泥",C:"沙子",D:"石灰"},
+        answer:["B"],
+        explainMap:{
+          A:"表述太泛，题库给的是更具体材料。",
+          B:"正确。题库对应的是河道淤泥。",
+          C:"不是本题答案。",
+          D:"不是本题答案。"
+        }
+      },
+      {
+        type:"single",
+        question:"香云纱的坯布底料，属于哪种面料（ ）",
+        options:{A:"纯棉",B:"真丝丝绸",C:"化纤",D:"麻布"},
+        answer:["B"],
+        explainMap:{
+          A:"纯棉不是题库对应底料。",
+          B:"正确。题库显示坯布底料是真丝丝绸。",
+          C:"化纤不是非遗香云纱底料。",
+          D:"麻布不是题库标准答案。"
+        }
+      },
+      {
+        type:"single",
+        question:"香云纱全程采用什么方式制作而成（ ）",
+        options:{A:"纯手工",B:"全机械化",C:"半手工半机械",D:"化工合成"},
+        answer:["A"],
+        explainMap:{
+          A:"正确。题库答案对应“纯手工”。",
+          B:"不符合题库内容。",
+          C:"不是本题标准答案。",
+          D:"更不符合香云纱非遗工艺特征。"
+        }
+      },
+      {
+        type:"single",
+        question:"香云纱染色全程，不含有以下哪种物质（ ）",
+        options:{A:"天然植物汁液",B:"天然河泥",C:"化学染料",D:"清水"},
+        answer:["C"],
+        explainMap:{
+          A:"天然植物汁液属于工艺使用材料之一。",
+          B:"天然河泥也是其关键材料之一。",
+          C:"正确。题库明确指出全程不含化学染料。",
+          D:"清水在工艺中也会使用。"
+        }
+      },
+      {
+        type:"single",
+        question:"香云纱最核心、最标志性的工艺叫做（ ）",
+        options:{A:"晒莨",B:"刺绣",C:"印染",D:"编织"},
+        answer:["A"],
+        explainMap:{
+          A:"正确。题库明确指出最核心、最标志性的工艺是晒莨。",
+          B:"刺绣不是本题核心工艺。",
+          C:"印染是泛化说法，不是这里的专有核心工艺名。",
+          D:"编织不是题库对应答案。"
+        }
+      },
+      {
+        type:"single",
+        question:"优质香云纱面料，手感整体偏向（ ）",
+        options:{A:"柔软轻薄",B:"挺括顺滑",C:"僵硬厚重",D:"蓬松软糯"},
+        answer:["B"],
+        explainMap:{
+          A:"不够准确，题库标准答案不是这一项。",
+          B:"正确。题库中优质香云纱手感整体偏向挺括顺滑。",
+          C:"僵硬厚重明显不对。",
+          D:"蓬松软糯也不是题库描述。"
+        }
+      },
+      {
+        type:"single",
+        question:"香云纱最适合穿着的季节是（ ）",
+        options:{A:"夏季",B:"冬季",C:"全年都适合",D:"春秋季"},
+        answer:["A"],
+        explainMap:{
+          A:"正确。题库参考答案显示最适合穿着的季节是夏季。",
+          B:"不是题库标准答案。",
+          C:"题库并未给出全年都适合。",
+          D:"不是本题标准答案。"
+        }
+      },
+      {
+        type:"single",
+        question:"下列哪一项，是香云纱的别称（ ）",
+        options:{A:"云锦",B:"宋锦",C:"响云纱",D:"蜀锦"},
+        answer:["C"],
+        explainMap:{
+          A:"云锦是另一类丝织名品，不是本题答案。",
+          B:"宋锦也不是香云纱别称。",
+          C:"正确。题库显示“响云纱”是香云纱的别称。",
+          D:"蜀锦同样不是香云纱别称。"
+        }
+      },
+      {
+        type:"single",
+        question:"香云纱染整时，薯莨和河泥发生反应，面料主要变为（ ）",
+        options:{A:"纯白色",B:"黑色、棕褐色",C:"鲜红色",D:"浅蓝色"},
+        answer:["B"],
+        explainMap:{
+          A:"与题库内容不符。",
+          B:"正确。题库给出的颜色变化是黑色、棕褐色。",
+          C:"不是本题答案。",
+          D:"不是本题答案。"
+        }
+      },
+      {
+        type:"single",
+        question:"清洗香云纱衣物，水温建议控制在（ ）",
+        options:{A:"冷水、30℃以下",B:"40℃热水",C:"开水",D:"温水即可"},
+        answer:["A"],
+        explainMap:{
+          A:"正确。题库建议使用冷水、30℃以下。",
+          B:"水温偏高，不符合题库建议。",
+          C:"开水明显不适合。",
+          D:"表述过于笼统，不是题库标准答案。"
+        }
+      },
+      {
+        type:"single",
+        question:"清洗香云纱衣物，禁止使用哪种方式（ ）",
+        options:{A:"轻柔手洗",B:"大力揉搓、机洗",C:"中性洗涤剂",D:"快速漂洗"},
+        answer:["B"],
+        explainMap:{
+          A:"这是相对合适的方式之一。",
+          B:"正确。题库明确禁止大力揉搓、机洗。",
+          C:"中性洗涤剂是建议做法之一。",
+          D:"并非本题所问的明确禁止项。"
+        }
+      },
+      {
+        type:"single",
+        question:"香云纱衣物洗完后，正确晾干方式是（ ）",
+        options:{A:"强光暴晒",B:"阴凉通风处阴干",C:"高温烘干",D:"密闭晾干"},
+        answer:["B"],
+        explainMap:{
+          A:"强光暴晒不合适。",
+          B:"正确。题库答案为阴凉通风处阴干。",
+          C:"高温烘干不适合香云纱。",
+          D:"密闭晾干也不对。"
+        }
+      },
+      {
+        type:"single",
+        question:"长期存放香云纱服饰，首选方式是（ ）",
+        options:{A:"重物挤压折叠",B:"衣架悬挂存放",C:"潮湿堆放",D:"高温存放"},
+        answer:["B"],
+        explainMap:{
+          A:"容易压伤面料，不合适。",
+          B:"正确。题库建议衣架悬挂存放。",
+          C:"潮湿堆放明显不合适。",
+          D:"高温存放也不适合。"
+        }
+      },
+      {
+        type:"single",
+        question:"香云纱面料上的深浅色斑、天然痕迹，属于（ ）",
+        options:{A:"质量次品",B:"天然正常现象",C:"做工瑕疵",D:"面料破损"},
+        answer:["B"],
+        explainMap:{
+          A:"题库并未将其视为质量次品。",
+          B:"正确。题库中说明这是天然正常现象。",
+          C:"并非一定是做工瑕疵。",
+          D:"不是面料破损。"
+        }
+      },
+      {
+        type:"single",
+        question:"香云纱被誉为纺织品里的“软黄金”，原因是（ ）",
+        options:{A:"造价低廉、产量超大",B:"工艺繁琐、纯手工产量极低",C:"含金成分",D:"化工合成"},
+        answer:["B"],
+        explainMap:{
+          A:"恰恰相反，不是因为低廉量大。",
+          B:"正确。因工艺繁琐、纯手工、产量低，所以被誉为“软黄金”。",
+          C:"不是因为含金成分。",
+          D:"更不是化工合成。"
+        }
+      },
+      {
+        type:"single",
+        question:"制作香云纱的核心工艺，主要依靠什么自然条件（ ）",
+        options:{A:"风吹",B:"阳光暴晒",C:"雨雪",D:"低温"},
+        answer:["B"],
+        explainMap:{
+          A:"不是核心依靠条件。",
+          B:"正确。题库指出主要依靠阳光暴晒。",
+          C:"雨雪不利于该工艺。",
+          D:"低温也不是关键条件。"
+        }
+      },
+      {
+        type:"single",
+        question:"下列哪种面料，是真正的非遗香云纱底料（ ）",
+        options:{A:"涤纶",B:"真丝",C:"棉麻",D:"冰丝"},
+        answer:["B"],
+        explainMap:{
+          A:"涤纶不是非遗香云纱底料。",
+          B:"正确。题库答案为真丝。",
+          C:"棉麻不是本题标准答案。",
+          D:"冰丝也不是本题答案。"
+        }
+      },
+      {
+        type:"single",
+        question:"香云纱属于什么类型的面料（ ）",
+        options:{A:"化纤面料",B:"天然环保丝绸面料",C:"再生面料",D:"合成面料"},
+        answer:["B"],
+        explainMap:{
+          A:"不符合题库内容。",
+          B:"正确。题库指出香云纱属于天然环保丝绸面料。",
+          C:"不是本题答案。",
+          D:"也不是本题答案。"
+        }
+      },
+      {
+        type:"single",
+        question:"红云纱和香云纱相比，最主要区别是少了哪道工序（ ）",
+        options:{A:"晾晒",B:"过泥",C:"浸植物汁",D:"漂洗"},
+        answer:["B"],
+        explainMap:{
+          A:"不是主要差别。",
+          B:"正确。题库指出红云纱少了过泥工序。",
+          C:"不是题库标准答案。",
+          D:"不是题库标准答案。"
+        }
+      },
+      {
+        type:"single",
+        question:"香云纱手工工艺，对天气要求严格，适合制作的天气是（ ）",
+        options:{A:"阴雨连绵",B:"晴天日照充足",C:"大风降温",D:"雾霾天气"},
+        answer:["B"],
+        explainMap:{
+          A:"阴雨天气不利于晒莨。",
+          B:"正确。题库答案为晴天日照充足。",
+          C:"大风降温不是理想条件。",
+          D:"雾霾天气更不适合。"
+        }
+      },
+      {
+        type:"single",
+        question:"穿着香云纱服饰，主要优点是（ ）",
+        options:{A:"闷热不透气",B:"清凉透气、亲肤解暑",C:"容易起球",D:"容易掉色"},
+        answer:["B"],
+        explainMap:{
+          A:"与香云纱优势相反。",
+          B:"正确。题库给出的主要优点是清凉透气、亲肤解暑。",
+          C:"不是它的主要优点。",
+          D:"也不是题库表达的优点。"
+        }
+      },
+      {
+        type:"single",
+        question:"香云纱服饰穿搭，忌讳接触以下哪种物品（ ）",
+        options:{A:"清水",B:"油污、尖锐硬物",C:"空气",D:"阴凉环境"},
+        answer:["B"],
+        explainMap:{
+          A:"清水并不是这里的忌讳项。",
+          B:"正确。题库明确忌讳接触油污、尖锐硬物。",
+          C:"空气显然不是。",
+          D:"阴凉环境也不是。"
+        }
+      },
+      {
+        type:"single",
+        question:"香云纱越穿越舒适，面料变化是（ ）",
+        options:{A:"越穿越硬",B:"越穿越柔软温润",C:"越穿越易碎",D:"毫无变化"},
+        answer:["B"],
+        explainMap:{
+          A:"与题库表述相反。",
+          B:"正确。题库指出面料会越穿越柔软温润。",
+          C:"不是题库答案。",
+          D:"题库并非这样描述。"
+        }
+      },
+      {
+        type:"single",
+        question:"以下哪项，不属于香云纱天然特点（ ）",
+        options:{A:"每匹面料颜色略有差异",B:"纯天然无化工染色",C:"百分百无色差",D:"耐穿耐磨"},
+        answer:["C"],
+        explainMap:{
+          A:"这是天然工艺面料可能出现的正常表现。",
+          B:"这是香云纱的重要特点之一。",
+          C:"正确。天然工艺面料不可能做到百分百无色差，所以这项不属于其天然特点。",
+          D:"也是题库列出的特点之一。"
+        }
+      },
+      {
+        type:"single",
+        question:"香云纱传统工艺，全程依靠天然原料，生产过程（ ）",
+        options:{A:"污染严重",B:"纯绿色环保",C:"有化工污染",D:"产生有害垃圾"},
+        answer:["B"],
+        explainMap:{
+          A:"与题库内容相反。",
+          B:"正确。题库指出其生产过程纯绿色环保。",
+          C:"题库明确不是化工污染路线。",
+          D:"也不是题库表达的特点。"
+        }
+      },
+      {
+        type:"single",
+        question:"香云纱主要面向什么风格穿搭（ ）",
+        options:{A:"复古国风、新中式",B:"潮流嘻哈",C:"休闲运动",D:"欧美辣妹"},
+        answer:["A"],
+        explainMap:{
+          A:"正确。题库答案对应复古国风、新中式。",
+          B:"不是题库主要风格方向。",
+          C:"不是本题标准答案。",
+          D:"不是题库答案。"
+        }
+      },
+      {
+        type:"single",
+        question:"市面上普通仿香云纱，和正品香云纱区别是（ ）",
+        options:{A:"纯手工天然工艺",B:"化工染色、机器量产",C:"非遗工艺",D:"真丝底料"},
+        answer:["B"],
+        explainMap:{
+          A:"这是正品香云纱特征，不是仿品差异项。",
+          B:"正确。题库指出普通仿品往往是化工染色、机器量产。",
+          C:"非遗工艺恰恰是正品特征。",
+          D:"真丝底料不是仿品的典型差异答案。"
+        }
+      },
+      {
+        type:"single",
+        question:"香云纱熨烫打理，正确做法是（ ）",
+        options:{A:"高温直接熨烫",B:"低温隔布熨烫",C:"不用熨烫",D:"高温蒸汽直喷"},
+        answer:["B"],
+        explainMap:{
+          A:"高温直接熨烫不适合。",
+          B:"正确。题库建议低温隔布熨烫。",
+          C:"不是题库标准答案。",
+          D:"高温蒸汽直喷风险较大，不符合题库建议。"
+        }
+      },
+      {
+        type:"single",
+        question:"香云纱传承至今，主要依托的是（ ）",
+        options:{A:"传统手工技艺",B:"现代化工技术",C:"机器批量生产",D:"外来工艺"},
+        answer:["A"],
+        explainMap:{
+          A:"正确。题库指出香云纱传承主要依托传统手工技艺。",
+          B:"不是题库答案。",
+          C:"也不是题库答案。",
+          D:"更不是题库所述依托。"
+        }
+      },
+      {
+        type:"single",
+        question:"存放香云纱时，不能和以下哪种物品同放（ ）",
+        options:{A:"干净衣物",B:"樟脑丸、香水",C:"防尘袋",D:"干燥纸巾"},
+        answer:["B"],
+        explainMap:{
+          A:"不是题库明确禁止项。",
+          B:"正确。题库明确不能和樟脑丸、香水同放。",
+          C:"防尘袋本身不是这里的禁忌项。",
+          D:"干燥纸巾也不是本题所指禁忌项。"
+        }
+      },
+      {
+        type:"single",
+        question:"新手鉴别香云纱，第一眼看（ ）",
+        options:{A:"颜色艳丽花哨",B:"哑光温润、天然复古色泽",C:"反光刺眼",D:"轻薄透亮"},
+        answer:["B"],
+        explainMap:{
+          A:"这不是香云纱最典型的第一印象。",
+          B:"正确。题库内容指出第一眼看应是哑光温润、天然复古色泽。",
+          C:"反光刺眼不符合其质感特征。",
+          D:"轻薄透亮不是题库强调的首要判断点。"
+        }
+      },
+
+      {
+        type:"judge",
+        question:"香云纱是世界纺织品中唯一用纯植物染料染色的真丝绸面料。（ ）",
+        options:{A:"正确",B:"错误"},
+        answer:["A"],
+        explainMap:{
+          A:"正确。题库判断题第1题为√。",
+          B:"错误。该说法在题库中判定为正确。"
+        }
+      },
+      {
+        type:"judge",
+        question:"香云纱的染整技艺又称晒莨。（ ）",
+        options:{A:"正确",B:"错误"},
+        answer:["A"],
+        explainMap:{
+          A:"正确。题库判断题第2题为√。",
+          B:"错误。题库明确该说法成立。"
+        }
+      },
+      {
+        type:"judge",
+        question:"唐代已有关于薯莨的记载。（ ）",
+        options:{A:"正确",B:"错误"},
+        answer:["A"],
+        explainMap:{
+          A:"正确。题库判断题第3题为√。",
+          B:"错误。题库判定该说法为真。"
+        }
+      },
+      {
+        type:"judge",
+        question:"香云纱染整过程中会产生污染环境的有害废料。（ ）",
+        options:{A:"正确",B:"错误"},
+        answer:["B"],
+        explainMap:{
+          A:"错误。题库判断题第4题为×。",
+          B:"正确。题库判定该说法错误。"
+        }
+      },
+      {
+        type:"judge",
+        question:"香云纱系纯手工制作，产量较高。（ ）",
+        options:{A:"正确",B:"错误"},
+        answer:["B"],
+        explainMap:{
+          A:"错误。纯手工并不意味着高产。",
+          B:"正确。题库判断题第5题为×，所以该说法错误。"
+        }
+      },
+      {
+        type:"judge",
+        question:"顺德伦教成艺晒莨厂是目前仅存的一家晒莨厂。（ ）",
+        options:{A:"正确",B:"错误"},
+        answer:["A"],
+        explainMap:{
+          A:"正确。题库判断题第6题为√。",
+          B:"错误。题库中该说法成立。"
+        }
+      },
+      {
+        type:"judge",
+        question:"香云纱的颜色只有黑色和褐色两种。（ ）",
+        options:{A:"正确",B:"错误"},
+        answer:["B"],
+        explainMap:{
+          A:"错误。题库判断题第7题为×。",
+          B:"正确。题库判定“只有两种颜色”这个说法不对。"
+        }
+      },
+      {
+        type:"judge",
+        question:"红云纱的成品率比普通香云纱高。（ ）",
+        options:{A:"正确",B:"错误"},
+        answer:["B"],
+        explainMap:{
+          A:"错误。题库判断题第8题为×。",
+          B:"正确。该说法在题库中被判定为错误。"
+        }
+      },
+      {
+        type:"judge",
+        question:"香云纱洗涤时可以用力揉搓。（ ）",
+        options:{A:"正确",B:"错误"},
+        answer:["B"],
+        explainMap:{
+          A:"错误。题库判断题第9题为×。",
+          B:"正确。题库明确不可以用力揉搓。"
+        }
+      },
+      {
+        type:"judge",
+        question:"香云纱穿着时应避免钩刮、拉扯和沾染油污。（ ）",
+        options:{A:"正确",B:"错误"},
+        answer:["A"],
+        explainMap:{
+          A:"正确。题库判断题第10题为√。",
+          B:"错误。题库明确该说法成立。"
+        }
+      },
+      {
+        type:"judge",
+        question:"香云纱在洗涤时出现轻微掉色或掉泥，属于正常现象。（ ）",
+        options:{A:"正确",B:"错误"},
+        answer:["A"],
+        explainMap:{
+          A:"正确。题库判断题第11题为√。",
+          B:"错误。题库中此说法成立。"
+        }
+      },
+      {
+        type:"judge",
+        question:"晒莨工序全年均可进行，不受天气影响。（ ）",
+        options:{A:"正确",B:"错误"},
+        answer:["B"],
+        explainMap:{
+          A:"错误。题库判断题第12题为×。",
+          B:"正确。晒莨明显受天气影响。"
+        }
+      },
+      {
+        type:"judge",
+        question:"7-8月上旬日照强烈，不宜进行晒莨工序。（ ）",
+        options:{A:"正确",B:"错误"},
+        answer:["A"],
+        explainMap:{
+          A:"正确。题库判断题第13题为√。",
+          B:"错误。题库明确此说法成立。"
+        }
+      },
+      {
+        type:"judge",
+        question:"香云纱的主要原料包括丝绸、薯莨和河泥。（ ）",
+        options:{A:"正确",B:"错误"},
+        answer:["A"],
+        explainMap:{
+          A:"正确。题库判断题第14题为√。",
+          B:"错误。题库明确此说法成立。"
+        }
+      },
+      {
+        type:"judge",
+        question:"清道光年间，南海开始织造土蚕丝平纹织物“绸”，经晒莨染整后便是莨绸。（ ）",
+        options:{A:"正确",B:"错误"},
+        answer:["A"],
+        explainMap:{
+          A:"正确。题库判断题第15题为√。",
+          B:"错误。题库中此说法成立。"
+        }
+      },
+      {
+        type:"judge",
+        question:"20世纪30年代，受世界性经济危机影响，香云纱生产受到沉重打击。（ ）",
+        options:{A:"正确",B:"错误"},
+        answer:["A"],
+        explainMap:{
+          A:"正确。题库判断题第16题为√。",
+          B:"错误。题库明确此说法成立。"
+        }
+      },
+      {
+        type:"judge",
+        question:"香云纱具有一定的保健效果，因为其原料薯莨是一种中药。（ ）",
+        options:{A:"正确",B:"错误"},
+        answer:["A"],
+        explainMap:{
+          A:"正确。题库判断题第17题为√。",
+          B:"错误。题库中该说法成立。"
+        }
+      },
+      {
+        type:"judge",
+        question:"南海西樵山规划打造千亩野生薯莨保育基地。（ ）",
+        options:{A:"正确",B:"错误"},
+        answer:["A"],
+        explainMap:{
+          A:"正确。题库判断题第18题为√。",
+          B:"错误。题库中该说法成立。"
+        }
+      },
+      {
+        type:"judge",
+        question:"香云纱的绞纱镂空提花织造技艺在民国时期走向成熟。（ ）",
+        options:{A:"正确",B:"错误"},
+        answer:["A"],
+        explainMap:{
+          A:"正确。题库判断题第19题为√。",
+          B:"错误。题库明确其为正确说法。"
+        }
+      },
+      {
+        type:"judge",
+        question:"香云纱染整技艺目前已经完全摆脱濒危状态。（ ）",
+        options:{A:"正确",B:"错误"},
+        answer:["B"],
+        explainMap:{
+          A:"错误。题库判断题第20题为×。",
+          B:"正确。题库说明该说法不成立。"
+        }
+      },
+
+      {
+        type:"multi",
+        question:"香云纱的别名有（ ）",
+        options:{A:"响云纱",B:"莨纱绸",C:"茛绸",D:"云纱"},
+        answer:["A","B","C","D"],
+        explainMap:{
+          A:"正确项。题库多选题第1题包含A。",
+          B:"正确项。题库多选题第1题包含B。",
+          C:"正确项。题库多选题第1题包含C。",
+          D:"正确项。题库多选题第1题包含D。"
+        }
+      },
+      {
+        type:"multi",
+        question:"香云纱的优点包括（ ）",
+        options:{A:"挺爽柔润",B:"日晒和水洗牢度佳",C:"防水性强",D:"易洗易干"},
+        answer:["A","B","C","D"],
+        explainMap:{
+          A:"正确项。题库多选题第2题包含A。",
+          B:"正确项。题库多选题第2题包含B。",
+          C:"正确项。题库多选题第2题包含C。",
+          D:"正确项。题库多选题第2题包含D。"
+        }
+      },
+      {
+        type:"multi",
+        question:"香云纱染整的主要原料有（ ）",
+        options:{A:"丝绸",B:"薯莨",C:"河泥",D:"化学染料"},
+        answer:["A","B","C"],
+        explainMap:{
+          A:"正确项。丝绸是主要原料之一。",
+          B:"正确项。薯莨是核心天然植物染料。",
+          C:"正确项。河泥是关键天然辅料之一。",
+          D:"错误项。题库明确香云纱工艺不依赖化学染料。"
+        }
+      },
+      {
+        type:"multi",
+        question:"香云纱染整工艺流程包括（ ）",
+        options:{A:"浸莨水",B:"晒莨",C:"过泥",D:"摊雾"},
+        answer:["A","B","C","D"],
+        explainMap:{
+          A:"正确项。属于流程之一。",
+          B:"正确项。晒莨是标志性步骤。",
+          C:"正确项。过泥是关键工序。",
+          D:"正确项。摊雾也在题库流程中。"
+        }
+      },
+      {
+        type:"multi",
+        question:"香云纱洗涤的注意事项有（ ）",
+        options:{A:"建议手洗或干洗",B:"使用中性洗涤剂",C:"避免用力揉搓",D:"30度以下温水"},
+        answer:["A","B","C","D"],
+        explainMap:{
+          A:"正确项。题库明确建议手洗或干洗。",
+          B:"正确项。题库建议使用中性洗涤剂。",
+          C:"正确项。题库明确避免用力揉搓。",
+          D:"正确项。题库建议30度以下温水。"
+        }
+      },
+      {
+        type:"multi",
+        question:"香云纱收藏的注意事项有（ ）",
+        options:{A:"悬挂保存",B:"深浅色分开",C:"避免喷洒香水",D:"与樟脑丸同放"},
+        answer:["A","B","C"],
+        explainMap:{
+          A:"正确项。悬挂保存更合适。",
+          B:"正确项。深浅色分开有利于保存。",
+          C:"正确项。应避免喷洒香水。",
+          D:"错误项。题库明确不能与樟脑丸同放。"
+        }
+      },
+      {
+        type:"multi",
+        question:"香云纱被誉为纺织品里的“软黄金”，原因是（ ）",
+        options:{A:"造价低廉、产量超大",B:"工艺繁琐、纯手工产量极低",C:"含金成分",D:"化工合成"},
+        answer:["B"],
+        explainMap:{
+          A:"错误项。与题库描述相反。",
+          B:"正确项。核心原因是工艺繁琐且纯手工、产量低。",
+          C:"错误项。不是因为含金。",
+          D:"错误项。不是化工合成。"
+        }
+      },
+      {
+        type:"multi",
+        question:"制作香云纱的核心工艺，主要依靠什么自然条件（ ）",
+        options:{A:"风吹",B:"阳光暴晒",C:"雨雪",D:"低温"},
+        answer:["B"],
+        explainMap:{
+          A:"错误项。不是核心依靠条件。",
+          B:"正确项。核心依靠阳光暴晒。",
+          C:"错误项。雨雪不利于制作。",
+          D:"错误项。低温不是关键。"
+        }
+      },
+      {
+        type:"multi",
+        question:"下列哪种面料，是真正的非遗香云纱底料（ ）",
+        options:{A:"涤纶",B:"真丝",C:"棉麻",D:"冰丝"},
+        answer:["B"],
+        explainMap:{
+          A:"错误项。不是非遗香云纱底料。",
+          B:"正确项。题库对应真丝。",
+          C:"错误项。不是本题答案。",
+          D:"错误项。不是本题答案。"
+        }
+      },
+      {
+        type:"multi",
+        question:"香云纱属于什么类型的面料（ ）",
+        options:{A:"化纤面料",B:"天然环保丝绸面料",C:"再生面料",D:"合成面料"},
+        answer:["B"],
+        explainMap:{
+          A:"错误项。不符合题库内容。",
+          B:"正确项。题库对应天然环保丝绸面料。",
+          C:"错误项。不是本题答案。",
+          D:"错误项。不是本题答案。"
+        }
+      },
+      {
+        type:"multi",
+        question:"红云纱和香云纱相比，最主要区别是少了哪道工序（ ）",
+        options:{A:"晾晒",B:"过泥",C:"浸植物汁",D:"漂洗"},
+        answer:["B"],
+        explainMap:{
+          A:"错误项。不是主要差别。",
+          B:"正确项。红云纱少过泥工序。",
+          C:"错误项。不是题库标准答案。",
+          D:"错误项。不是题库标准答案。"
+        }
+      },
+      {
+        type:"multi",
+        question:"香云纱手工工艺，对天气要求严格，适合制作的天气是（ ）",
+        options:{A:"阴雨连绵",B:"晴天日照充足",C:"大风降温",D:"雾霾天气"},
+        answer:["B"],
+        explainMap:{
+          A:"错误项。阴雨不利于制作。",
+          B:"正确项。晴天日照充足最合适。",
+          C:"错误项。不是理想条件。",
+          D:"错误项。更不适合。"
+        }
+      },
+      {
+        type:"multi",
+        question:"顺德成为香云纱染整工艺起源地的优势有（ ）",
+        options:{A:"优质河泥资源",B:"盛产薯莨",C:"桑蚕业发达",D:"晒地充足"},
+        answer:["A","B","C","D"],
+        explainMap:{
+          A:"正确项。优质河泥资源是重要优势。",
+          B:"正确项。薯莨资源充足很关键。",
+          C:"正确项。桑蚕业发达提供了底料基础。",
+          D:"正确项。晒地充足有利于晒莨工艺。"
+        }
+      },
+      {
+        type:"multi",
+        question:"香云纱历史发展的重要阶段包括（ ）",
+        options:{A:"明代永乐年间出口国外",B:"20世纪20年代鼎盛",C:"20世纪80年代衰落",D:"1998年开始复苏"},
+        answer:["A","B","C","D"],
+        explainMap:{
+          A:"正确项。属于历史发展阶段之一。",
+          B:"正确项。20世纪20年代曾进入鼎盛期。",
+          C:"正确项。20世纪80年代经历衰落。",
+          D:"正确项。1998年开始复苏。"
+        }
+      },
+      {
+        type:"multi",
+        question:"香云纱染整技艺濒危的原因有（ ）",
+        options:{A:"纯手工制作，工艺繁复",B:"产量少",C:"受天气和环境限制",D:"从业人员减少"},
+        answer:["A","B","C","D"],
+        explainMap:{
+          A:"正确项。纯手工且工艺繁复。",
+          B:"正确项。产量少导致传承难度大。",
+          C:"正确项。天气和环境限制明显。",
+          D:"正确项。从业人员减少也是重要原因。"
+        }
+      },
+      {
+        type:"multi",
+        question:"红云纱的特点有（ ）",
+        options:{A:"少过泥工序",B:"对底胚布品质要求高",C:"颜色呈红褐色",D:"成品率低"},
+        answer:["A","B","C","D"],
+        explainMap:{
+          A:"正确项。红云纱少过泥工序。",
+          B:"正确项。对底胚布品质要求高。",
+          C:"正确项。颜色呈红褐色。",
+          D:"正确项。题库中该项也列入特点。"
+        }
+      }
+    ];
+
+    const $ = id => document.getElementById(id);
+    const els = {
+      quizCard:$("quizCard"), questionNo:$("questionNo"), questionType:$("questionType"), questionTitle:$("questionTitle"),
+      options:$("options"), submitBtn:$("submitBtn"), nextBtn:$("nextBtn"), analysisPanel:$("analysisPanel"),
+      analysisBody:$("analysisBody"), progressText:$("progressText"), scoreText:$("scoreText"), progressFill:$("progressFill"),
+      resultCard:$("resultCard"), finalScore:$("finalScore"), correctCount:$("correctCount"), wrongCount:$("wrongCount"),
+      accuracyText:$("accuracyText"), startBtn:$("startBtn"), restartBtn:$("restartBtn"), retryBtn:$("retryBtn"),
+      wrongBtn:$("wrongBtn"), wrongPanel:$("wrongPanel"), wrongList:$("wrongList"), soundBtn:$("soundBtn"),
+      cursorDot:$("cursorDot"), cursorRing:$("cursorRing"), pageTransition:$("pageTransition"), seal3d:$("seal3d")
+    };
+
+    let currentSet = [], currentIndex = 0, score = 0, answered = false, wrongItems = [], soundOn = true;
+
+    function shuffle(arr){
+      const a=[...arr];
+      for(let i=a.length-1;i>0;i--){
+        const j=Math.floor(Math.random()*(i+1));
+        [a[i],a[j]]=[a[j],a[i]];
+      }
+      return a;
+    }
+
+    function startQuiz(){
+      transitionIn(() => {
+        currentSet = shuffle(questionBank).slice(0,10);
+        currentIndex = 0;
+        score = 0;
+        answered = false;
+        wrongItems = [];
+        els.resultCard.classList.remove("show");
+        els.wrongPanel.classList.remove("show");
+        renderQuestion();
+        updateProgress();
+        els.scoreText.textContent = "得分：0";
+        renderWrongList();
+      });
+    }
+
+    function renderQuestion(){
+      const q = currentSet[currentIndex];
+      if(!q) return;
+      answered = false;
+      els.nextBtn.disabled = true;
+      els.submitBtn.disabled = false;
+      els.analysisPanel.classList.remove("show");
+      els.questionNo.textContent = `第 ${currentIndex+1} / ${currentSet.length} 题`;
+      els.questionTitle.textContent = q.question;
+      els.questionType.className = "type-badge " + q.type;
+      els.questionType.textContent = q.type === "multi" ? "多选题" : q.type === "judge" ? "判断题" : "单选题";
+      els.options.innerHTML = "";
+      Object.entries(q.options).forEach(([k,v],i)=>{
+        const div = document.createElement("div");
+        div.className = "option";
+        div.dataset.key = k;
+        div.innerHTML = `<div class="option-key">${k}</div><div class="option-text">${v}</div>`;
+        div.addEventListener("click",()=>selectOption(div,q.type));
+        div.addEventListener("mouseenter",()=>playTone(660,.03,.02,"triangle"));
+        els.options.appendChild(div);
+        gsap.fromTo(div,{opacity:0,y:18,rotateX:-10},{opacity:1,y:0,rotateX:0,duration:.45,delay:i*0.04,ease:"power3.out"});
+      });
+      els.quizCard.classList.remove("expand");
+      void els.quizCard.offsetWidth;
+      els.quizCard.classList.add("expand");
+      gsap.fromTo(els.questionTitle,{opacity:0,y:8},{opacity:1,y:0,duration:.35,ease:"power2.out"});
+    }
+
+    function selectOption(item,type){
+      if(answered) return;
+      if(type === "multi"){
+        item.classList.toggle("selected");
+      }else{
+        [...els.options.children].forEach(n=>n.classList.remove("selected"));
+        item.classList.add("selected");
+      }
+      playTone(540,.04,.025,"sine");
+    }
+
+    function getSelected(){
+      return [...els.options.querySelectorAll(".option.selected")].map(n=>n.dataset.key).sort();
+    }
+
+    function equalArr(a,b){
+      return a.length===b.length && a.every((v,i)=>v===b[i]);
+    }
+
+    function submitAnswer(){
+      if(answered) return;
+      const q = currentSet[currentIndex];
+      const selected = getSelected();
+      if(!selected.length){
+        vibrate([70,40,70]);
+        shakeCard();
+        return;
+      }
+      answered = true;
+      els.submitBtn.disabled = true;
+      els.nextBtn.disabled = false;
+
+      const correct = [...q.answer].sort();
+      const isRight = equalArr(selected, correct);
+
+      if(isRight) score++;
+      else wrongItems.push({question:q.question, selected:[...selected], correct:[...correct]});
+
+      [...els.options.children].forEach(el=>{
+        const key = el.dataset.key;
+        const isSel = selected.includes(key);
+        const isCor = correct.includes(key);
+        if(isCor) el.classList.add("correct");
+        if(isSel && !isCor) el.classList.add("wrong");
+      });
+
+      if(isRight) {
+        playSuccess();
+      } else {
+        playError();
+        vibrate([60,30,120]);
+        shakeCard();
+      }
+
+      renderAnalysis(q, selected, correct, isRight);
+      els.analysisPanel.classList.add("show");
+      els.scoreText.textContent = `得分：${score}`;
+      updateProgress(true);
+      renderWrongList();
+
+      gsap.fromTo(els.analysisPanel,{opacity:0,y:10},{opacity:1,y:0,duration:.35,ease:"power2.out"});
+    }
+
+    function renderAnalysis(q, selected, correct, isRight){
+      let html = `<div class="status-pill ${isRight ? "ok":"bad"}">${isRight ? "回答正确":"回答错误"}</div>`;
+      html += `<p><strong>你的答案：</strong>${selected.length ? selected.join("、") : "未作答"}</p>`;
+      html += `<p><strong>正确答案：</strong>${correct.join("、")}</p>`;
+      if(q.type==="multi" && selected.length < correct.length){
+        html += `<p><strong>提示：</strong>本题为多选题，你本次未选满正确项，所以直接进入解析，但不会自动跳到下一题。</p>`;
+      }
+      Object.keys(q.options).forEach(k=>{
+        html += `<div class="option-explain"><p><strong>${k}. ${q.options[k]}</strong></p><p>${q.explainMap[k] || "暂无解析"}</p></div>`;
+      });
+      els.analysisBody.innerHTML = html;
+    }
+
+    function nextQuestion(){
+      if(!answered) return;
+      transitionIn(() => {
+        currentIndex++;
+        if(currentIndex >= currentSet.length){
+          showResult();
+        }else{
+          renderQuestion();
+          updateProgress();
+        }
+      });
+    }
+
+    function updateProgress(afterAnswer=false){
+      const done = currentSet.length ? Math.min(currentIndex + (afterAnswer ? 1 : 0), currentSet.length) : 0;
+      const percent = currentSet.length ? (done / currentSet.length) * 100 : 0;
+      els.progressFill.style.width = `${percent}%`;
+      els.progressText.textContent = currentSet.length ? `当前进度：${done} / ${currentSet.length}` : "尚未开始";
+    }
+
+    function showResult(){
+      els.progressFill.style.width = "100%";
+      els.progressText.textContent = `当前进度：10 / 10`;
+      els.resultCard.classList.add("show");
+      els.finalScore.textContent = `${score} / ${currentSet.length}`;
+      els.correctCount.textContent = score;
+      els.wrongCount.textContent = currentSet.length - score;
+      els.accuracyText.textContent = `${Math.round(score/currentSet.length*100)}%`;
+      els.questionNo.textContent = "答题结束";
+      els.questionType.className = "type-badge single";
+      els.questionType.textContent = "完成";
+      els.questionTitle.textContent = "本轮答题已经完成";
+      els.options.innerHTML = "";
+      els.analysisPanel.classList.remove("show");
+      els.submitBtn.disabled = true;
+      els.nextBtn.disabled = true;
+      gsap.fromTo(els.resultCard,{opacity:0,y:20,scale:.98},{opacity:1,y:0,scale:1,duration:.5,ease:"power3.out"});
+    }
+
+    function renderWrongList(){
+      if(!wrongItems.length){
+        els.wrongList.innerHTML = `<p style="color:#d9bb96;line-height:1.8;">当前还没有错题。</p>`;
+        return;
+      }
+      els.wrongList.innerHTML = wrongItems.map((w,i)=>`
+        <div class="wrong-item">
+          <h4>${i+1}. ${w.question}</h4>
+          <p>你的答案：${w.selected.join("、") || "未作答"}</p>
+          <p>正确答案：${w.correct.join("、")}</p>
+        </div>
+      `).join("");
+    }
+
+    function transitionIn(cb){
+      gsap.timeline()
+        .to(els.pageTransition,{opacity:1,duration:.25,ease:"power2.out"})
+        .to(els.pageTransition,{scale:1,duration:.25,ease:"power2.out"},"<")
+        .add(()=>cb && cb())
+        .to(els.pageTransition,{opacity:0,duration:.35,ease:"power2.out"});
+    }
+
+    function shakeCard(){
+      gsap.fromTo(els.quizCard,{x:0},{x:-8,duration:.05,repeat:5,yoyo:true,ease:"power1.inOut"});
+    }
+
+    function vibrate(pattern){
+      if(navigator.vibrate) navigator.vibrate(pattern);
+    }
+
+    function playTone(freq=520,duration=.06,volume=.03,type="sine"){
+      if(!soundOn) return;
+      try{
+        const ctx = playTone.ctx || (playTone.ctx = new (window.AudioContext || window.webkitAudioContext)());
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = type;
+        o.frequency.value = freq;
+        g.gain.value = volume;
+        o.connect(g); g.connect(ctx.destination);
+        o.start();
+        g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+        o.stop(ctx.currentTime + duration);
+      }catch(e){}
+    }
+    function playSuccess(){
+      playTone(620,.06,.03,"triangle");
+      setTimeout(()=>playTone(820,.08,.03,"triangle"),60);
+    }
+    function playError(){
+      playTone(280,.08,.03,"sawtooth");
+      setTimeout(()=>playTone(220,.1,.025,"sawtooth"),70);
+    }
+
+    els.startBtn.addEventListener("click", startQuiz);
+    els.restartBtn.addEventListener("click", startQuiz);
+    els.retryBtn.addEventListener("click", startQuiz);
+    els.submitBtn.addEventListener("click", submitAnswer);
+    els.nextBtn.addEventListener("click", nextQuestion);
+    els.wrongBtn.addEventListener("click", ()=>{
+      els.wrongPanel.classList.toggle("show");
+      playTone(480,.05,.025,"triangle");
+    });
+    els.soundBtn.addEventListener("click", ()=>{
+      soundOn = !soundOn;
+      els.soundBtn.textContent = `音效：${soundOn ? "开":"关"}`;
+      if(soundOn) playSuccess();
+    });
+
+    document.addEventListener("keydown", e=>{
+      const map = ["A","B","C","D"];
+      if(map.includes(e.key.toUpperCase())){
+        const q = currentSet[currentIndex];
+        if(!q || answered) return;
+        const target = [...els.options.children].find(n=>n.dataset.key===e.key.toUpperCase());
+        if(target) target.click();
+      }
+      if(e.key === "Enter") submitAnswer();
+      if(e.key.toLowerCase() === "n") nextQuestion();
+    });
+
+    // 核心修改：鼠标跟随动画改为同步无延迟
+    window.addEventListener("mousemove",e=>{
+      const mx = e.clientX;
+      const my = e.clientY;
+      // 小点和圆环同步跟随鼠标，无延迟
+      els.cursorDot.style.left = `${mx}px`;
+      els.cursorDot.style.top = `${my}px`;
+      els.cursorRing.style.left = `${mx}px`;
+      els.cursorRing.style.top = `${my}px`;
+    });
+
+    // 移除原来的animateCursor函数（不需要缓动跟随了）
+
+    document.addEventListener("mouseover",e=>{
+      if(e.target.closest(".btn,.option")){
+        els.cursorRing.style.width="54px";
+        els.cursorRing.style.height="54px";
+        els.cursorRing.style.borderColor="rgba(246,215,164,.95)";
+      }else{
+        els.cursorRing.style.width="34px";
+        els.cursorRing.style.height="34px";
+        els.cursorRing.style.borderColor="rgba(246,215,164,.68)";
+      }
+    });
+
+    function addTilt(card){
+      card.addEventListener("mousemove",e=>{
+        const r = card.getBoundingClientRect();
+        const x = e.clientX - r.left;
+        const y = e.clientY - r.top;
+        const rx = ((y-r.height/2)/(r.height/2))*-4;
+        const ry = ((x-r.width/2)/(r.width/2))*5;
+        card.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg) translateY(-2px)`;
+      });
+      card.addEventListener("mouseleave",()=>{
+        card.style.transform = `rotateX(0deg) rotateY(0deg) translateY(0)`;
+      });
+    }
+    addTilt(els.quizCard);
+    addTilt(els.seal3d);
+
+    particlesJS("particles-js",{
+      particles:{
+        number:{value:36,density:{enable:true,value_area:1100}},
+        color:{value:["#c8955b","#f1d8a7","#8f4d28","#d7b07d"]},
+        shape:{type:"circle"},
+        opacity:{value:.16,random:true},
+        size:{value:3.2,random:true},
+        line_linked:{enable:true,distance:150,color:"#b98554",opacity:.08,width:1},
+        move:{enable:true,speed:1.1,direction:"none",random:true,straight:false,out_mode:"out"}
+      },
+      interactivity:{
+        detect_on:"canvas",
+        events:{onhover:{enable:false},onclick:{enable:false},resize:true}
+      },
+      retina_detect:true
+    });
+
+    gsap.from(".topbar",{opacity:0,y:-18,duration:.7,ease:"power3.out"});
+    gsap.from(".hero",{opacity:0,y:24,duration:.75,delay:.08,ease:"power3.out"});
+    gsap.from(".progress-card",{opacity:0,y:18,duration:.65,delay:.14,ease:"power3.out"});
+    gsap.from(".quiz-card",{opacity:0,y:22,duration:.75,delay:.2,ease:"power3.out"});
+    gsap.from(".side-card",{opacity:0,x:20,duration:.6,stagger:.08,delay:.26,ease:"power3.out"});
+  </script>
+</body>
+</html>
